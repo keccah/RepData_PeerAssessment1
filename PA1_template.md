@@ -1,45 +1,10 @@
 PA1_template - Rebecca Porphirio - March 8, 2016
 Loading and preprocessing the data
 -
-```{r echo=FALSE}
-multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
-  library(grid)
-  
-  # Make a list from the ... arguments and plotlist
-  plots <- c(list(...), plotlist)
-  
-  numPlots = length(plots)
-  
-  # If layout is NULL, then use 'cols' to determine layout
-  if (is.null(layout)) {
-    # Make the panel
-    # ncol: Number of columns of plots
-    # nrow: Number of rows needed, calculated from # of cols
-    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
-                     ncol = cols, nrow = ceiling(numPlots/cols))
-  }
-  
-  if (numPlots==1) {
-    print(plots[[1]])
-    
-  } else {
-    # Set up the page
-    grid.newpage()
-    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
-    
-    # Make each plot, in the correct location
-    for (i in 1:numPlots) {
-      # Get the i,j matrix positions of the regions that contain this subplot
-      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-      
-      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
-                                      layout.pos.col = matchidx$col))
-    }
-  }
-}
-```
 
-```{r message=FALSE}
+
+
+```r
 #loading due libraries
 library(dplyr)
 library(ggplot2)
@@ -53,10 +18,21 @@ activity$date <- as.Date(as.character(activity$date),"%Y-%m-%d")
 head(activity)
 ```
 
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
+```
+
 What is the mean and the total number of steps taken per day?
 -
 
-```{r message=FALSE, fig.width=10,fig.height=5}
+
+```r
 #Calculating total number of steps taken per day
 days <- 
   activity %>%
@@ -64,7 +40,13 @@ days <-
   summarize(steps=sum(steps,na.rm=TRUE),
             steps_mean=sum(steps,na.rm=TRUE)/n())
 sum(days$steps,na.rm=TRUE)
+```
 
+```
+## [1] 570608
+```
+
+```r
 #Ploting total number of steps taken each day
 options(scipen=999)    #removing scientific notations
 ggplot(days, aes(date, steps)) + 
@@ -72,30 +54,44 @@ ggplot(days, aes(date, steps)) +
   xlab("") + 
   ylab("Steps taken") +
   ggtitle("Total number of steps taken each day")
+```
 
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+
+```r
 #Calculating mean and median of the total number of steps taken per day
 sum(days$steps,na.rm=TRUE)/nrow(days)
+```
+
+```
+## [1] 9354.23
+```
+
+```r
 median(days$steps)
 ```
 
-```{r echo=FALSE}
-p1 <- ggplot(days, aes(date, steps)) + 
-  geom_bar(stat="identity", fill="burlywood1",color="brown3") +
-  xlab("") + 
-  ylab("Steps taken") +
-  ggtitle("Total number of steps taken each day")
 ```
+## [1] 10395
+```
+
+
 
 What is the average daily activity pattern?
 -
 
-```{r message=FALSE, fig.width=10,fig.height=5}
+
+```r
 #Plotting a time series of the 5-minute interval and the average number of steps taken, averaged across all
 #days 
 ggplot(days, aes(date, steps_mean)) + geom_line(color="cadetblue3") +
   xlab("") + ylab("Steps taken") +
   ggtitle("Average number of steps taken each day")
+```
 
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
+
+```r
 #Creating a separate dataset
 intervals <- 
   activity %>%
@@ -107,14 +103,36 @@ intervals <-
 intervals[which.max(intervals$steps_mean),"interval"]
 ```
 
+```
+## Source: local data frame [1 x 1]
+## 
+##   interval
+##      (int)
+## 1      835
+```
+
 Imputing missing values
 -
 
-```{r message=FALSE,fig.width=10,fig.height=10}
+
+```r
 #What is the total number of missing values in the dataset?
 length(which(is.na(activity$steps)))
-length(which(is.na(activity$steps)))/nrow(activity)
+```
 
+```
+## [1] 2304
+```
+
+```r
+length(which(is.na(activity$steps)))/nrow(activity)
+```
+
+```
+## [1] 0.1311475
+```
+
+```r
 #Creating new dataset equal to the original dataset but with the missing data filled in
 steps_fixed <-
   activity %>%
@@ -136,11 +154,28 @@ p2 <- ggplot(days_fixed, aes(date, steps)) +
   ylab("Steps taken") +
   ggtitle("Total number of steps taken each day- NAs fixed")
 multiplot(p1,p2) #using the multiplot function to build two graphics at the same time. 
+```
 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
+
+```r
 #Calculating mean and median total number of steps taken per day in new dataset
 sum(days_fixed$steps,na.rm=TRUE)/nrow(days)
-median(days_fixed$steps)
+```
 
+```
+## [1] 10581.01
+```
+
+```r
+median(days_fixed$steps)
+```
+
+```
+## [1] 10395
+```
+
+```r
 #Impact of imputing missing data on the estimates of the total daily number of steps
 #Mean increased 13% but median hasn't moved.
 #It changes most on the beginning of November where there's most of the NAs.
@@ -149,7 +184,8 @@ median(days_fixed$steps)
 Are there differences in activity patterns between weekdays and weekends?
 -
 
-```{r message=FALSE, fig.width=10,fig.height=5}
+
+```r
 #Creating a dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday 
 #or weekend day
 weekdays_weekends <-
@@ -171,3 +207,5 @@ ggplot(weekdays_weekends, aes(factor(interval), steps, fill = factor(day_type)))
   ylab("Steps taken") +
   ggtitle("Average number of steps taken per 5-minute interval across weekdays and weekends")
 ```
+
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png) 
